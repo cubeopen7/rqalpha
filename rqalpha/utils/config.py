@@ -91,18 +91,18 @@ def set_locale(lc):
 
 
 def parse_config(config_args, config_path=None, click_type=True, source_code=None):
-    mod_configs = config_args.pop("mod_configs", [])
+    mod_configs = config_args.pop("mod_configs", []) # MOD配置
     for cfg, value in mod_configs:
         key = "mod__{}".format(cfg.replace(".", "__"))
         config_args[key] = mod_config_value_parse(value)
 
     set_locale(config_args.get("extra__locale", None))
 
-    config_path = get_default_config_path() if config_path is None else os.path.abspath(config_path)
+    config_path = get_default_config_path() if config_path is None else os.path.abspath(config_path) # 系统配置文件地址
 
-    config = load_config(config_path)
+    config = load_config(config_path) # 读取系统配置
 
-    if click_type:
+    if click_type: # 将 策略配置 与 系统配置 拼接
         for key, value in six.iteritems(config_args):
             if key in ["config_path"]:
                 continue
@@ -121,9 +121,9 @@ def parse_config(config_args, config_path=None, click_type=True, source_code=Non
     else:
         deep_update(config_args, config)
 
-    config = parse_user_config(config, source_code)
+    config = parse_user_config(config, source_code) # 拼接用户在代码中指定的配置
 
-    config = RqAttrDict(config)
+    config = RqAttrDict(config) # 将配置字典转换为类属性, 以及字典值中的字典也转换为类属性
 
     base_config = config.base
     extra_config = config.extra
@@ -133,17 +133,17 @@ def parse_config(config_args, config_path=None, click_type=True, source_code=Non
     if isinstance(base_config.start_date, six.string_types):
         base_config.start_date = datetime.datetime.strptime(base_config.start_date, "%Y-%m-%d")
     if isinstance(base_config.start_date, datetime.datetime):
-        base_config.start_date = base_config.start_date.date()
+        base_config.start_date = base_config.start_date.date() # 将策略时间由字符串转为datetime.date
     if isinstance(base_config.end_date, six.string_types):
         base_config.end_date = datetime.datetime.strptime(base_config.end_date, "%Y-%m-%d")
     if isinstance(base_config.end_date, datetime.datetime):
-        base_config.end_date = base_config.end_date.date()
+        base_config.end_date = base_config.end_date.date() # 将策略时间由字符串转为datetime.date
     if base_config.commission_multiplier < 0:
         raise patch_user_exc(ValueError(_("invalid commission multiplier value: value range is [0, +∞)")))
     if base_config.margin_multiplier <= 0:
         raise patch_user_exc(ValueError(_("invalid margin multiplier value: value range is (0, +∞]")))
 
-    if base_config.data_bundle_path is None:
+    if base_config.data_bundle_path is None: # 设置数据文件位置
         base_config.data_bundle_path = os.path.expanduser("~/.rqalpha")
 
     base_config.data_bundle_path = os.path.abspath(base_config.data_bundle_path)
@@ -151,20 +151,20 @@ def parse_config(config_args, config_path=None, click_type=True, source_code=Non
     if os.path.basename(base_config.data_bundle_path) != "bundle":
         base_config.data_bundle_path = os.path.join(base_config.data_bundle_path, "./bundle")
 
-    if not os.path.exists(base_config.data_bundle_path):
+    if not os.path.exists(base_config.data_bundle_path): # 判断数据是否存在, 没有则报错
         system_log.error(
             _("data bundle not found in {bundle_path}. Run `rqalpha update_bundle` to download data bundle.").format(
                 bundle_path=base_config.data_bundle_path))
         return
 
-    if source_code is None and not os.path.exists(base_config.strategy_file):
+    if source_code is None and not os.path.exists(base_config.strategy_file): # 判断 策略代码 或 策略文件 是否存在, 没有则报错
         system_log.error(
             _("strategy file not found in {strategy_file}").format(strategy_file=base_config.strategy_file))
         return
 
     base_config.run_type = parse_run_type(base_config.run_type)
-    base_config.account_list = gen_account_list(base_config.strategy_type)
-    base_config.matching_type = parse_matching_type(base_config.matching_type)
+    base_config.account_list = gen_account_list(base_config.strategy_type) # 资金账户列表: 股票, 期货
+    base_config.matching_type = parse_matching_type(base_config.matching_type) # 每日交易时间: 下日开盘/当日收盘
     base_config.persist_mode = parse_persist_mode(base_config.persist_mode)
 
     if extra_config.log_level.upper() != "NONE":
@@ -177,13 +177,13 @@ def parse_config(config_args, config_path=None, click_type=True, source_code=Non
         import json
         extra_config.context_vars = json.loads(base64.b64decode(extra_config.context_vars).decode('utf-8'))
 
-    if base_config.stock_starting_cash < 0:
+    if base_config.stock_starting_cash < 0: # 股票账户初始资金
         raise patch_user_exc(ValueError(_('invalid stock starting cash: {}').format(base_config.stock_starting_cash)))
 
-    if base_config.future_starting_cash < 0:
+    if base_config.future_starting_cash < 0: # 期货账户初始资金
         raise patch_user_exc(ValueError(_('invalid future starting cash: {}').format(base_config.future_starting_cash)))
 
-    if base_config.stock_starting_cash + base_config.future_starting_cash == 0:
+    if base_config.stock_starting_cash + base_config.future_starting_cash == 0: # 两个账户的资金不能同时为0
         raise patch_user_exc(ValueError(_('stock starting cash and future starting cash can not be both 0.')))
 
     system_log.level = getattr(logbook, extra_config.log_level.upper(), logbook.NOTSET)
@@ -191,7 +191,7 @@ def parse_config(config_args, config_path=None, click_type=True, source_code=Non
     user_log.level = getattr(logbook, extra_config.log_level.upper(), logbook.NOTSET)
     user_system_log.level = getattr(logbook, extra_config.log_level.upper(), logbook.NOTSET)
 
-    if base_config.frequency == "1d":
+    if base_config.frequency == "1d": # 如果是日线策略, 日志时间格式需要调整
         logger.DATETIME_FORMAT = "%Y-%m-%d"
 
     system_log.debug("\n" + pformat(config))

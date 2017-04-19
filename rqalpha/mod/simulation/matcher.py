@@ -22,7 +22,7 @@ from rqalpha.model.trade import Trade
 from rqalpha.environment import Environment
 from rqalpha.events import EVENT
 
-
+# 撮合机制类型
 class Matcher(object):
     def __init__(self,
                  deal_price_decider,
@@ -32,9 +32,9 @@ class Matcher(object):
         self._turnover = defaultdict(int)
         self._calendar_dt = None
         self._trading_dt = None
-        self._deal_price_decider = deal_price_decider
-        self._volume_percent = volume_percent
-        self._bar_limit = bar_limit
+        self._deal_price_decider = deal_price_decider # 交易价格 获取方法
+        self._volume_percent = volume_percent # 成交量占当前bar总量的上限, 默认25%, 即要操作的量超过该bar总量的25%, 不撮合
+        self._bar_limit = bar_limit # 有没有日内显示(是否是T+1), 股票/期货有区别
 
     def update(self, calendar_dt, trading_dt, bar_dict):
         self._board = bar_dict

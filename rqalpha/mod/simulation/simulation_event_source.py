@@ -26,13 +26,13 @@ from rqalpha.const import ACCOUNT_TYPE
 
 ONE_MINUTE = datetime.timedelta(minutes=1)
 
-
+# 模拟帐号事件源
 class SimulationEventSource(AbstractEventSource):
     def __init__(self, env, account_list):
         self._env = env
         self._account_list = account_list
-        self._universe_changed = False
-        Environment.get_instance().event_bus.add_listener(EVENT.POST_UNIVERSE_CHANGED, self._on_universe_changed)
+        self._universe_changed = False  # 股票池是否发生变化
+        Environment.get_instance().event_bus.add_listener(EVENT.POST_UNIVERSE_CHANGED, self._on_universe_changed)  # 策略股票池发生变化后触发
 
     def _on_universe_changed(self, universe):
         self._universe_changed = True

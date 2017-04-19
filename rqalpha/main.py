@@ -155,17 +155,17 @@ Are you sure to continue?""").format(data_bundle_path=data_bundle_path), abort=T
     six.print_(_("Data bundle download successfully in {bundle_path}").format(bundle_path=data_bundle_path))
 
 
-def run(config, source_code=None):
-    env = Environment(config)
+def run(config, source_code=None): # 此处的config是RqAttrDict类, 是dict转换得到的
+    env = Environment(config) # 初始化引擎环境
     persist_helper = None
     init_succeed = False
-    mod_handler = ModHandler()
+    mod_handler = ModHandler() # 多个模块的初始化, 包含很多必用模块
 
     try:
-        env.set_strategy_loader(FileStrategyLoader() if source_code is None else SourceCodeStrategyLoader())
-        env.set_global_vars(GlobalVars())
-        mod_handler.set_env(env)
-        mod_handler.start_up()
+        env.set_strategy_loader(FileStrategyLoader() if source_code is None else SourceCodeStrategyLoader()) # 设置获取策略的方法: 文件/代码
+        env.set_global_vars(GlobalVars()) # 全局变量
+        mod_handler.set_env(env) # 获取并初始化多个MOD模块
+        mod_handler.start_up() # MOD参数按CONFIG初始化
 
         if not env.data_source:
             env.set_data_source(BaseDataSource(config.base.data_bundle_path))

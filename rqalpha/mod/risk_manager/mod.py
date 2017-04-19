@@ -32,7 +32,7 @@ class RiskManagerMod(AbstractMod):
     def start_up(self, env, mod_config):
         self._env = env
         self.mod_config = mod_config
-        self._env.event_bus.prepend_listener(EVENT.ORDER_PENDING_NEW, self._frontend_validate)
+        self._env.event_bus.prepend_listener(EVENT.ORDER_PENDING_NEW, self._frontend_validate)  # 创建订单后触发
 
     def tear_down(self, code, exception=None):
         pass

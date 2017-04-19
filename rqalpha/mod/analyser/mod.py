@@ -30,7 +30,7 @@ from rqalpha.utils.risk import Risk
 from rqalpha.utils.repr import properties
 from rqalpha.execution_context import ExecutionContext
 
-
+# 回测分析: 包含: 收益, 下单记录, 成交记录
 class AnalyserMod(AbstractMod):
     def __init__(self):
         self._env = None
@@ -56,9 +56,9 @@ class AnalyserMod(AbstractMod):
                          self._mod_config.plot_save_file or self._mod_config.report_save_path)
 
         if self._enabled:
-            env.event_bus.add_listener(EVENT.POST_SETTLEMENT, self._collect_daily)
-            env.event_bus.add_listener(EVENT.TRADE, self._collect_trade)
-            env.event_bus.add_listener(EVENT.ORDER_CREATION_PASS, self._collect_order)
+            env.event_bus.add_listener(EVENT.POST_SETTLEMENT, self._collect_daily)  # 结算后触发
+            env.event_bus.add_listener(EVENT.TRADE, self._collect_trade)  # 成交后触发
+            env.event_bus.add_listener(EVENT.ORDER_CREATION_PASS, self._collect_order)  # 创建订单成功后出发
 
     def _collect_trade(self, account, trade):
         self._trades.append(self._to_trade_record(trade))

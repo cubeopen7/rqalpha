@@ -49,14 +49,14 @@ def init_accounts(env):
 
     return accounts
 
-
+# 模拟账户
 class SimulationBroker(AbstractBroker, Persistable):
     def __init__(self, env):
         self._env = env
-        if env.config.base.matching_type == MATCHING_TYPE.CURRENT_BAR_CLOSE:
+        if env.config.base.matching_type == MATCHING_TYPE.CURRENT_BAR_CLOSE:  # 当日收盘交易
             self._matcher = Matcher(lambda bar: bar.close, env.config.validator.bar_limit)
             self._match_immediately = True
-        else:
+        else:  # 下日开盘交易
             self._matcher = Matcher(lambda bar: bar.open, env.config.validator.bar_limit)
             self._match_immediately = False
 

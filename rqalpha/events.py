@@ -29,7 +29,7 @@ class Event(object):
 class EventBus(object):
     def __init__(self):
         self._listeners = defaultdict(list)
-
+    # 为event事件绑定处理方法listener, 当触发event时会调用该事件对应的listener列表中的函数
     def add_listener(self, event, listener):
         self._listeners[event].append(listener)
 

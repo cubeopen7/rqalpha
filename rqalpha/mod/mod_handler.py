@@ -31,12 +31,18 @@ class ModHandler(object):
         self._env = environment
 
         config = environment.config
-
+        # config中mod属性依次设置
         for mod_name in config.mod.__dict__:
             mod_config = getattr(config.mod, mod_name)
-            if not mod_config.enabled:
+            if not mod_config.enabled: # 过滤未启用的mod
                 continue
-            self._mod_list.append((mod_name, mod_config))
+            self._mod_list.append((mod_name, mod_config)) # 获得启用的mod的列表
+        '''
+        常用的MOD:
+        1. risk_manager: 风控模块
+        2. simulation: 模拟账户,账户管理,成交撮合管理
+        3. analyser: 回测分析模块,收益,下单记录,成交记录
+        '''
 
         self._mod_list.sort(key=lambda item: item[1].priority)
         for mod_name, mod_config in self._mod_list:

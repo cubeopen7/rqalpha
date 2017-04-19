@@ -31,7 +31,7 @@ class Environment(object):
         self._strategy_loader = None
         self._global_vars = None
         self._persist_provider = None
-        self._commission_initializer = init_commission
+        self._commission_initializer = init_commission # 佣金初始方法
         self.system_log = system_log
         self.user_log = user_log
         self.user_detail_log = user_detail_log

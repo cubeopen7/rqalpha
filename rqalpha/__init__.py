@@ -38,7 +38,7 @@ del pkgutil
 def run(config, source_code=None):
     from .utils.config import parse_config
     from . import main
-
+    # 此处的config是dict类型, 但需要使用parse_config函数转换为类, 才能传入run函数
     return main.run(parse_config(config, click_type=False, source_code=source_code), source_code=source_code)
 
 

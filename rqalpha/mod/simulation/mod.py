@@ -26,7 +26,7 @@ class SimulationMod(AbstractMod):
 
     def start_up(self, env, mod_config):
         self._env = env
-        self._env.set_broker(SimulationBroker(self._env))
+        self._env.set_broker(SimulationBroker(self._env)) # 给环境设置broker, 即模拟帐号
 
         event_source = SimulationEventSource(env, env.config.base.account_list)
         env.set_event_source(event_source)
