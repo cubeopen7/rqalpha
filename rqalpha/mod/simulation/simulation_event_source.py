@@ -80,7 +80,7 @@ class SimulationEventSource(AbstractEventSource):
             elif account_type == ACCOUNT_TYPE.FUTURE:
                 trading_minutes = trading_minutes.union(self._get_future_trading_minutes(trading_date))
         return sorted(list(trading_minutes))
-
+    # 事件生成器, 按日回测会产生 BEFORE_TRADING | BAR | AFTER_TRADING | SETTLEMENT(结算)
     def events(self, start_date, end_date, frequency):
         if frequency == "1d":
             # 根据起始日期和结束日期，获取所有的交易日，然后再循环获取每一个交易日
@@ -94,7 +94,7 @@ class SimulationEventSource(AbstractEventSource):
                 yield Event(EVENT.BAR, dt_bar, dt_bar)
 
                 yield Event(EVENT.AFTER_TRADING, dt_after_trading, dt_after_trading)
-                yield Event(EVENT.SETTLEMENT, dt_settlement, dt_settlement)
+                yield Event(EVENT.SETTLEMENT, dt_settlement, dt_settlement)  # 触发结算事件
         else:
             for day in self._env.data_proxy.get_trading_dates(start_date, end_date):
                 before_trading_flag = True

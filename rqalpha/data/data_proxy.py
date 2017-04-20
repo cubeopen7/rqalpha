@@ -39,8 +39,8 @@ class DataProxy(InstrumentMixin, TradingDatesMixin):
             self.get_risk_free_rate = data_source.get_risk_free_rate
         except AttributeError:
             pass
-        InstrumentMixin.__init__(self, data_source.get_all_instruments())  # 过滤一些无用标的代码
-        TradingDatesMixin.__init__(self, data_source.get_trading_calendar())
+        InstrumentMixin.__init__(self, data_source.get_all_instruments())  # 过滤一些无用标的代码, 另外proxy获得了操作Instrument的方法
+        TradingDatesMixin.__init__(self, data_source.get_trading_calendar())  # proxy获得了操作TradingDates的方法
 
     def __getattr__(self, item):
         return getattr(self._data_source, item)

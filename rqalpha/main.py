@@ -219,7 +219,7 @@ def run(config, source_code=None): # 此处的config是RqAttrDict类, 是dict转
         if env.config.extra.enable_profiler:
             enable_profiler(env, scope)
 
-        ucontext = StrategyContext()
+        ucontext = StrategyContext()  # 策略中的context变量, 用户存储的全局变量
         user_strategy = Strategy(env.event_bus, scope, ucontext)  # 用户策略管理类初始化
         scheduler.set_user_context(ucontext)
 
