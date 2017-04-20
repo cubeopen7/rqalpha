@@ -22,7 +22,7 @@ from ...utils.repr import dict_repr
 class MixedAccount(object):
     def __init__(self, accounts):
         self._accounts = exclude_benchmark_generator(accounts)
-        self._portfolio = MixedPortfolio([account.portfolio for account in self._accounts.values()])
+        self._portfolio = MixedPortfolio([account.portfolio for account in self._accounts.values()])  # 股票 | 期货 组合混合
 
     def get_portfolio(self, trading_date):
         return MixedPortfolio([account.get_portfolio(trading_date) for account in self._accounts.values()])

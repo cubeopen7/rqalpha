@@ -20,10 +20,10 @@ import datetime
 from ..execution_context import ExecutionContext
 from ..utils import instrument_type_str2enum
 
-
+# 标的基本数据类
 class Instrument(object):
-    DEFAULT_LISTED_DATE = datetime.datetime(1990, 1, 1)
-    DEFAULT_DE_LISTED_DATE = datetime.datetime(2999, 12, 31)
+    DEFAULT_LISTED_DATE = datetime.datetime(1990, 1, 1)  # 默认上市时间
+    DEFAULT_DE_LISTED_DATE = datetime.datetime(2999, 12, 31)  # 默认退市时间
 
     @staticmethod
     def _fix_date(ds, dflt):
@@ -35,7 +35,7 @@ class Instrument(object):
     def __init__(self, dic):
         self.__dict__ = dic
         if 'listed_date' in self.__dict__:
-            self.listed_date = self._fix_date(self.listed_date, self.DEFAULT_LISTED_DATE)
+            self.listed_date = self._fix_date(self.listed_date, self.DEFAULT_LISTED_DATE)  # 将时间类型由'2017-04-19'字符串, 转换为datetime.datetime格式
         if 'de_listed_date' in self.__dict__:
             self.de_listed_date = self._fix_date(self.de_listed_date, self.DEFAULT_DE_LISTED_DATE)
         if 'maturity_date' in self.__dict__:

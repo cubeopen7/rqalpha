@@ -41,20 +41,20 @@ class BaseDataSource(AbstractDataSource):
             return os.path.join(path, name)
 
         self._day_bars = [
-            DayBarStore(_p('stocks.bcolz'), StockBarConverter),
+            DayBarStore(_p('stocks.bcolz'), StockBarConverter), # 参数: 1.数据地址, 2.数据格式及转换规则等
             DayBarStore(_p('indexes.bcolz'), IndexBarConverter),
             DayBarStore(_p('futures.bcolz'), FutureDayBarConverter),
             DayBarStore(_p('funds.bcolz'), FundDayBarConverter),
         ]
 
-        self._instruments = InstrumentStore(_p('instruments.pk'))
-        self._adjusted_dividends = DividendStore(_p('adjusted_dividends.bcolz'))
+        self._instruments = InstrumentStore(_p('instruments.pk'))  # 获取pkl储存的标的列表, 值为Instrument类
+        self._adjusted_dividends = DividendStore(_p('adjusted_dividends.bcolz'))  # 两种分红数据
         self._original_dividends = DividendStore(_p('original_dividends.bcolz'))
-        self._trading_dates = TradingDatesStore(_p('trading_dates.bcolz'))
-        self._yield_curve = YieldCurveStore(_p('yield_curve.bcolz'))
+        self._trading_dates = TradingDatesStore(_p('trading_dates.bcolz'))  # 交易日数据, pd.Index类型, 日期为pd.Timestamp格式
+        self._yield_curve = YieldCurveStore(_p('yield_curve.bcolz'))  # 无风险收益数据
 
-        self._st_stock_days = DateSet(_p('st_stock_days.bcolz'))
-        self._suspend_days = DateSet(_p('suspended_days.bcolz'))
+        self._st_stock_days = DateSet(_p('st_stock_days.bcolz'))  # 每支股票对应的被ST的日期序列
+        self._suspend_days = DateSet(_p('suspended_days.bcolz'))  # 每支股票对应的停盘的日期序列
 
         self.get_yield_curve = self._yield_curve.get_yield_curve
         self.get_risk_free_rate = self._yield_curve.get_risk_free_rate

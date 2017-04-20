@@ -31,7 +31,7 @@ from ..model.snapshot import SnapshotObject
 from ..utils.datetime_func import convert_int_to_datetime
 from ..const import HEDGE_TYPE
 
-
+# 数据代理(数据提供方法)
 class DataProxy(InstrumentMixin, TradingDatesMixin):
     def __init__(self, data_source):
         self._data_source = data_source
@@ -39,7 +39,7 @@ class DataProxy(InstrumentMixin, TradingDatesMixin):
             self.get_risk_free_rate = data_source.get_risk_free_rate
         except AttributeError:
             pass
-        InstrumentMixin.__init__(self, data_source.get_all_instruments())
+        InstrumentMixin.__init__(self, data_source.get_all_instruments())  # 过滤一些无用标的代码
         TradingDatesMixin.__init__(self, data_source.get_trading_calendar())
 
     def __getattr__(self, item):

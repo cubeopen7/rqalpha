@@ -27,7 +27,7 @@ from rqalpha.model.account import BenchmarkAccount, StockAccount, FutureAccount
 
 from .matcher import Matcher
 
-
+# 账户初始化
 def init_accounts(env):
     accounts = {}
     config = env.config
@@ -35,8 +35,8 @@ def init_accounts(env):
     total_cash = 0
     for account_type in config.base.account_list:
         if account_type == ACCOUNT_TYPE.STOCK:
-            stock_starting_cash = config.base.stock_starting_cash
-            accounts[ACCOUNT_TYPE.STOCK] = StockAccount(env, stock_starting_cash, start_date)
+            stock_starting_cash = config.base.stock_starting_cash  # 初始资金
+            accounts[ACCOUNT_TYPE.STOCK] = StockAccount(env, stock_starting_cash, start_date)  # 初始化账户
             total_cash += stock_starting_cash
         elif account_type == ACCOUNT_TYPE.FUTURE:
             future_starting_cash = config.base.future_starting_cash

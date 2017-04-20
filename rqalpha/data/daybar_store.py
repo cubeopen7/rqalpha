@@ -17,12 +17,12 @@
 import bcolz
 import numpy as np
 
-
+# 日线数据存储类
 class DayBarStore(object):
     def __init__(self, main, converter):
-        self._table = bcolz.open(main, 'r')
-        self._index = self._table.attrs['line_map']
-        self._converter = converter
+        self._table = bcolz.open(main, 'r')  # 数据表
+        self._index = self._table.attrs['line_map']  # 每个标的对应的索引起始位置
+        self._converter = converter  # 数据转换类, 包含该种数据的格式规则等
 
     @staticmethod
     def _remove_(l, v):

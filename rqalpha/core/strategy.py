@@ -41,15 +41,15 @@ class Strategy(object):
         self._after_trading = scope.get('after_trading', None)
 
         if self._before_trading is not None:
-            event_bus.add_listener(EVENT.BEFORE_TRADING, self.before_trading)
+            event_bus.add_listener(EVENT.BEFORE_TRADING, self.before_trading)  # 添加BEFORE_TRADING的处理方法
         if self._handle_bar is not None:
-            event_bus.add_listener(EVENT.BAR, self.handle_bar)
+            event_bus.add_listener(EVENT.BAR, self.handle_bar)  # 添加BAR的处理方法
         if self._handle_tick is not None:
             event_bus.add_listener(EVENT.TICK, self.handle_tick)
         if self._after_trading is not None:
-            event_bus.add_listener(EVENT.AFTER_TRADING, self.after_trading)
+            event_bus.add_listener(EVENT.AFTER_TRADING, self.after_trading)  # 添加AFTER_TRADING的处理方法
 
-        self._before_day_trading = scope.get('before_day_trading', None)
+        self._before_day_trading = scope.get('before_day_trading', None)  # before_day_trading | before_night_trading 不再使用
         self._before_night_trading = scope.get('before_night_trading', None)
         if self._before_day_trading is not None:
             user_system_log.warn(_("[deprecated] before_day_trading is no longer used. use before_trading instead."))

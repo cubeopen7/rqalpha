@@ -88,12 +88,12 @@ class Scheduler(object):
         self._current_minute = 0
         self._stage = None
         self._ucontext = None
-        self._frequency = frequency
+        self._frequency = frequency  # 调度器执行频率
 
         event_bus = Environment.get_instance().event_bus
-        event_bus.add_listener(EVENT.PRE_BEFORE_TRADING, self.next_day_)
-        event_bus.add_listener(EVENT.BEFORE_TRADING, self.before_trading_)
-        event_bus.add_listener(EVENT.BAR, self.next_bar_)
+        event_bus.add_listener(EVENT.PRE_BEFORE_TRADING, self.next_day_)  # 执行before_trading函数前触发
+        event_bus.add_listener(EVENT.BEFORE_TRADING, self.before_trading_)  # 该事件会触发策略的before_trading函数
+        event_bus.add_listener(EVENT.BAR, self.next_bar_)  # 该事件会触发策略的handle_bar函数
 
     def set_user_context(self, ucontext):
         self._ucontext = ucontext

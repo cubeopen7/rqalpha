@@ -97,10 +97,10 @@ def _validate_benchmark(config, data_proxy):
 
 def create_base_scope():
     import copy
-
+    # 初始化环境中的方法
     from . import user_module
-    scope = copy.copy(user_module.__dict__)
-    scope.update({
+    scope = copy.copy(user_module.__dict__)  # 读取用户模块, 初始化执行方法
+    scope.update({                           # 添加 logger | print 两个常用方法
         "logger": user_log,
         "print": user_print,
     })
@@ -167,25 +167,25 @@ def run(config, source_code=None): # 此处的config是RqAttrDict类, 是dict转
         mod_handler.set_env(env) # 获取并初始化多个MOD模块
         mod_handler.start_up() # MOD参数按CONFIG初始化
 
-        if not env.data_source:
+        if not env.data_source: # 没有数据源, 则获取基础数据源
             env.set_data_source(BaseDataSource(config.base.data_bundle_path))
 
-        env.set_data_proxy(DataProxy(env.data_source))
-        ExecutionContext.data_proxy = env.data_proxy
-        Scheduler.set_trading_dates_(env.data_source.get_trading_calendar())
-        scheduler = Scheduler(config.base.frequency)
+        env.set_data_proxy(DataProxy(env.data_source))  # 设置数据代理
+        ExecutionContext.data_proxy = env.data_proxy  # 执行环境也使用这个数据代理
+        Scheduler.set_trading_dates_(env.data_source.get_trading_calendar())  # 为调度器初始化日期列表
+        scheduler = Scheduler(config.base.frequency)  # 初始化调度器
         mod_scheduler._scheduler = scheduler
 
         env._universe = StrategyUniverse()
 
-        _adjust_start_date(env.config, env.data_proxy)
+        _adjust_start_date(env.config, env.data_proxy)  # 调整策略开始结束时间在指定范围内, 不得超出
 
-        _validate_benchmark(env.config, env.data_proxy)
+        _validate_benchmark(env.config, env.data_proxy)  # 验证所选的benchmark, 基准指数, 在回测日期内是否有效
 
         broker = env.broker
         assert broker is not None
-        env.accounts = accounts = broker.get_accounts()
-        env.account = account = MixedAccount(accounts)
+        env.accounts = accounts = broker.get_accounts()  # 初始化资金账户字典
+        env.account = account = MixedAccount(accounts)  # 两个账户的混合
 
         ExecutionContext.broker = broker
         ExecutionContext.accounts = accounts
@@ -196,36 +196,36 @@ def run(config, source_code=None): # 此处的config是RqAttrDict类, 是dict转
         assert event_source is not None
 
         bar_dict = BarMap(env.data_proxy, config.base.frequency)
-        ctx = ExecutionContext(const.EXECUTION_PHASE.GLOBAL, bar_dict)
-        ctx._push()
+        ctx = ExecutionContext(const.EXECUTION_PHASE.GLOBAL, bar_dict)  # 设置执行全局环境
+        ctx._push()  # 将全局环境放在环境堆顶
 
         # FIXME
         start_dt = datetime.datetime.combine(config.base.start_date, datetime.datetime.min.time())
         env.calendar_dt = ExecutionContext.calendar_dt = start_dt
         env.trading_dt = ExecutionContext.trading_dt = start_dt
 
-        env.event_bus.publish_event(EVENT.POST_SYSTEM_INIT)
+        env.event_bus.publish_event(EVENT.POST_SYSTEM_INIT)  # 发布系统初始化完毕时间
 
-        scope = create_base_scope()
+        scope = create_base_scope()  #
         scope.update({
-            "g": env.global_vars
+            "g": env.global_vars  # 添加全局变量
         })
 
-        apis = api_helper.get_apis(config.base.account_list)
-        scope.update(apis)
+        apis = api_helper.get_apis(config.base.account_list)  # 获取所有平台支持的API方法, 如查询数据, 下单等
+        scope.update(apis)  # 将API中的方法添加到scope中
 
-        scope = env.strategy_loader.load(env.config.base.strategy_file if source_code is None else source_code, scope)
+        scope = env.strategy_loader.load(env.config.base.strategy_file if source_code is None else source_code, scope)  # 编译策略代码, 结合scope中的方法, 存储在scope中
 
         if env.config.extra.enable_profiler:
             enable_profiler(env, scope)
 
         ucontext = StrategyContext()
-        user_strategy = Strategy(env.event_bus, scope, ucontext)
+        user_strategy = Strategy(env.event_bus, scope, ucontext)  # 用户策略管理类初始化
         scheduler.set_user_context(ucontext)
 
         if not config.extra.force_run_init_when_pt_resume:
             with run_with_user_log_disabled(disabled=config.base.resume_mode):
-                user_strategy.init()
+                user_strategy.init()  # 在此执行策略中的init函数
 
         if config.extra.context_vars:
             for k, v in six.iteritems(config.extra.context_vars):

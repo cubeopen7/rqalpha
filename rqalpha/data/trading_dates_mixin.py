@@ -26,7 +26,7 @@ except Exception as e:
 class TradingDatesMixin(object):
     def __init__(self, dates):
         self._dates = dates
-
+    # 获取开始结束日期包含两端的日期列表
     def get_trading_dates(self, start_date, end_date):
         # 只需要date部分
         start_date = pd.Timestamp(start_date).replace(hour=0, minute=0, second=0)

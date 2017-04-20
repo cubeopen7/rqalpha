@@ -35,10 +35,10 @@ class BaseAccount(Persistable):
         self.config = env.config
 
         self.portfolio = init_portfolio(init_cash, start_date, account_type)
-        self.slippage_decider = init_slippage(env.config.base.slippage)
+        self.slippage_decider = init_slippage(env.config.base.slippage)  # 滑点设置
         commission_initializer = env._commission_initializer
-        self.commission_decider = commission_initializer(self._account_type, env.config.base.commission_multiplier)
-        self.tax_decider = init_tax(self._account_type)
+        self.commission_decider = commission_initializer(self._account_type, env.config.base.commission_multiplier)  # 佣金初始化
+        self.tax_decider = init_tax(self._account_type)  # 印花税初始化
 
         self.all_portfolios = OrderedDict()
         self.daily_orders = {}

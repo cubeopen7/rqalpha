@@ -18,8 +18,8 @@ from collections import namedtuple
 
 import numpy as np
 
+# 数据格式: 字段数据类型, 缩放比例, 小数点后精确位数
 Rule = namedtuple('Rule', ['dtype', 'multiplier', 'round'])
-
 
 class Converter(object):
     def __init__(self, rules):
@@ -45,6 +45,7 @@ class Converter(object):
 
 float64 = np.dtype('float64')
 
+# 每个字段的属性, 规则
 StockBarConverter = Converter({
     'open': Rule(float64, 1 / 10000.0, 4),
     'close': Rule(float64, 1 / 10000.0, 4),

@@ -21,7 +21,7 @@ from six import exec_
 
 from .exception import patch_user_exc, CustomError, CustomException
 
-
+# 编译策略
 def compile_strategy(source_code, strategy, scope):
     try:
         code = compile(source_code, strategy, 'exec')
