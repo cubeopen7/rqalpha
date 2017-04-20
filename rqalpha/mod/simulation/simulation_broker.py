@@ -167,7 +167,7 @@ class SimulationBroker(AbstractBroker, Persistable):
         # self._match()
 
     def _match(self):
-        self._matcher.match(self._open_orders)
+        self._matcher.match(self._open_orders)  # 在此撮合委托单
         final_orders = [(a, o) for a, o in self._open_orders if o._is_final()]
         self._open_orders = [(a, o) for a, o in self._open_orders if not o._is_final()]
 

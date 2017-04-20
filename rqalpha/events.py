@@ -61,6 +61,9 @@ class EVENT(Enum):
     # 执行before_trading函数前触发
     # pre_before_trading()
     PRE_BEFORE_TRADING = 'pre_before_trading'
+    '''
+
+    '''
     # 该事件会触发策略的before_trading函数
     # before_trading()
     BEFORE_TRADING = 'before_trading'

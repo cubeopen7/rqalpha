@@ -282,7 +282,7 @@ if __name__ == '__main__':
             end_time = datetime.now()
 
     else:
-        test_api()
+        # test_api()
         error_count = get_test_files()
         end_time = datetime.now()
         if error_count == 0:
