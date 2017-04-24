@@ -268,9 +268,10 @@ def run(config, source_code=None): # 此处的config是RqAttrDict类, 是dict转
             ExecutionContext.trading_dt = trading_dt
             env.calendar_dt = calendar_dt
             env.trading_dt = trading_dt
+            # 更新各个账户的当前时间
             for account in accounts.values():
                 account.portfolio._current_date = trading_dt.date()
-
+            # 根据不同的时间类型进行处理
             if event_type == EVENT.BEFORE_TRADING:
                 env.event_bus.publish_event(EVENT.PRE_BEFORE_TRADING)
                 env.event_bus.publish_event(EVENT.BEFORE_TRADING)
