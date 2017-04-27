@@ -61,7 +61,7 @@ class SimulationBroker(AbstractBroker, Persistable):
             self._match_immediately = False
 
         self._accounts = None
-        self._open_orders = []
+        self._open_orders = []  # 未成交订单列表, 元素为tuple: (账户, 订单)
         self._board = None
         self._turnover = {}
         self._delayed_orders = []
@@ -98,15 +98,15 @@ class SimulationBroker(AbstractBroker, Persistable):
                         self._open_orders.append((account, o))
 
     def _get_account_for(self, order_book_id):
-        account_type = get_account_type(order_book_id)
+        account_type = get_account_type(order_book_id)  # 根据标的, 获取需要操作的账户类型
         return self._accounts[account_type]
 
-    def submit_order(self, order):
-        account = self._get_account_for(order.order_book_id)
+    def submit_order(self, order):  # 提交订单
+        account = self._get_account_for(order.order_book_id)  # 获取相应账户
 
-        self._env.event_bus.publish_event(EVENT.ORDER_PENDING_NEW, account, order)
+        self._env.event_bus.publish_event(EVENT.ORDER_PENDING_NEW, account, order)  # 触发创建订单事件
 
-        account.append_order(order)
+        account.append_order(order)  # 向账户中添加该订单
         if order._is_final():
             return
 
@@ -116,10 +116,10 @@ class SimulationBroker(AbstractBroker, Persistable):
             return
 
         self._open_orders.append((account, order))
-        order._active()
-        self._env.event_bus.publish_event(EVENT.ORDER_CREATION_PASS, account, order)
+        order._active()  # 激活委托单, 可以被交易
+        self._env.event_bus.publish_event(EVENT.ORDER_CREATION_PASS, account, order)  # 触发订单创建成功事件
         if self._match_immediately:
-            self._match()
+            self._match()  # 在此撮合订单
 
     def cancel_order(self, order):
         account = self._get_account_for(order.order_book_id)
@@ -145,7 +145,7 @@ class SimulationBroker(AbstractBroker, Persistable):
             order._active()
             self._env.event_bus.publish_event(EVENT.ORDER_CREATION_PASS, account, order)
 
-    def after_trading(self):
+    def after_trading(self):  # 处理未成交订单
         for account, order in self._open_orders:
             order._mark_rejected(_("Order Rejected: {order_book_id} can not match. Market close.").format(
                 order_book_id=order.order_book_id
@@ -154,10 +154,10 @@ class SimulationBroker(AbstractBroker, Persistable):
         self._open_orders = self._delayed_orders
         self._delayed_orders = []
 
-    def bar(self, bar_dict):
+    def bar(self, bar_dict):  # 更新Matcher撮合类变量, 并撮合昨天未成交的委托单
         env = Environment.get_instance()
         self._matcher.update(env.calendar_dt, env.trading_dt, bar_dict)
-        self._match()
+        self._match()  # 委托单撮合
 
     def tick(self, tick):
         # TODO support tick matching
@@ -166,11 +166,11 @@ class SimulationBroker(AbstractBroker, Persistable):
         # self._matcher.update(env.calendar_dt, env.trading_dt, tick)
         # self._match()
 
-    def _match(self):
+    def _match(self):  # 撮合订单
         self._matcher.match(self._open_orders)  # 在此撮合委托单
-        final_orders = [(a, o) for a, o in self._open_orders if o._is_final()]
-        self._open_orders = [(a, o) for a, o in self._open_orders if not o._is_final()]
+        final_orders = [(a, o) for a, o in self._open_orders if o._is_final()]  # 处理完毕的单子
+        self._open_orders = [(a, o) for a, o in self._open_orders if not o._is_final()]  # 剩余的待处理的单子
 
         for account, order in final_orders:
-            if order.status == ORDER_STATUS.REJECTED or order.status == ORDER_STATUS.CANCELLED:
+            if order.status == ORDER_STATUS.REJECTED or order.status == ORDER_STATUS.CANCELLED:  # 对于被拒以及取消的单子
                 self._env.event_bus.publish_event(EVENT.ORDER_UNSOLICITED_UPDATE, account, order)

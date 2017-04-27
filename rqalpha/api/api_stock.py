@@ -105,7 +105,7 @@ def order_shares(id_or_ins, amount, style=MarketOrder()):
         if style.get_limit_price() <= 0:
             raise RQInvalidArgument(_("Limit order price should be positive"))
 
-    order_book_id = assure_stock_order_book_id(id_or_ins)
+    order_book_id = assure_stock_order_book_id(id_or_ins)  # 检查标的能否交易
     bar_dict = ExecutionContext.get_current_bar_dict()
     bar = bar_dict[order_book_id]
     price = bar.close
@@ -125,7 +125,7 @@ def order_shares(id_or_ins, amount, style=MarketOrder()):
     except ValueError:
         amount = 0
 
-    r_order = Order.__from_create__(calendar_dt, trading_dt, order_book_id, amount, side, style, None)
+    r_order = Order.__from_create__(calendar_dt, trading_dt, order_book_id, amount, side, style, None)  # 创建Order委托单
 
     if bar.isnan or price == 0:
         user_system_log.warn(_("Order Creation Failed: [{order_book_id}] No market data").format(order_book_id=order_book_id))
@@ -139,7 +139,7 @@ def order_shares(id_or_ins, amount, style=MarketOrder()):
         return r_order
     if r_order.type == ORDER_TYPE.MARKET:
         bar_dict = ExecutionContext.get_current_bar_dict()
-        r_order._frozen_price = bar_dict[order_book_id].close
+        r_order._frozen_price = bar_dict[order_book_id].close  # 市价单, _frozen_price设置为当日收盘价
     ExecutionContext.broker.submit_order(r_order)
 
     return r_order
@@ -240,7 +240,7 @@ def order_value(id_or_ins, cash_amount, style=MarketOrder()):
     # :rtype: int
     if not isinstance(style, OrderStyle):
         raise RQInvalidArgument(_('style should be OrderStyle'))
-    if isinstance(style, LimitOrder):
+    if isinstance(style, LimitOrder):  # 如果是限价单
         if style.get_limit_price() <= 0:
             raise RQInvalidArgument(_("Limit order price should be positive"))
 
@@ -254,21 +254,21 @@ def order_value(id_or_ins, cash_amount, style=MarketOrder()):
         return order_shares(order_book_id, 0, style)
 
     account = ExecutionContext.accounts[ACCOUNT_TYPE.STOCK]
-    round_lot = int(ExecutionContext.get_instrument(order_book_id).round_lot)
+    round_lot = int(ExecutionContext.get_instrument(order_book_id).round_lot)  # 最小操作单位, 此处为100股
 
     if cash_amount > 0:
-        cash_amount = min(cash_amount, account.portfolio.cash)
+        cash_amount = min(cash_amount, account.portfolio.cash)  # 可用下单现金, MIN(指定买入金额, 账户中的现金)
 
     if isinstance(style, MarketOrder):
-        amount = int(Decimal(cash_amount) / Decimal(price) / Decimal(round_lot)) * round_lot
+        amount = int(Decimal(cash_amount) / Decimal(price) / Decimal(round_lot)) * round_lot  # 操作股数
     else:
         amount = int(Decimal(cash_amount) / Decimal(style.get_limit_price()) / Decimal(round_lot)) * round_lot
 
     # if the cash_amount is larger than you current security’s position,
     # then it will sell all shares of this security.
 
-    position = account.portfolio.positions[order_book_id]
-    amount = downsize_amount(amount, position)
+    position = account.portfolio.positions[order_book_id]  # 该股现在的仓位
+    amount = downsize_amount(amount, position)  # 如果是卖出, 保证指定的卖出股数, 不超过该股当前可卖出的股数
 
     return order_shares(order_book_id, amount, style)
 
@@ -437,16 +437,16 @@ def order_target_percent(id_or_ins, percent, style=MarketOrder()):
     # :rtype: int
     if percent < 0 or percent > 1:
         raise RQInvalidArgument(_('percent should between 0 and 1'))
-    order_book_id = assure_stock_order_book_id(id_or_ins)
+    order_book_id = assure_stock_order_book_id(id_or_ins)  # 检查标的能否交易
 
-    bar_dict = ExecutionContext.get_current_bar_dict()
-    bar = bar_dict[order_book_id]
-    price = 0 if bar.isnan else bar.close
+    bar_dict = ExecutionContext.get_current_bar_dict()  # 获取当日BAR数据
+    bar = bar_dict[order_book_id]  # 这支股票的当日BAR数据
+    price = 0 if bar.isnan else bar.close  # 交易价格, 取收盘价
 
-    portfolio = ExecutionContext.accounts[ACCOUNT_TYPE.STOCK].portfolio
-    position = portfolio.positions[order_book_id]
+    portfolio = ExecutionContext.accounts[ACCOUNT_TYPE.STOCK].portfolio  # 股票账户Portfolio
+    position = portfolio.positions[order_book_id]  # 股票账户Portfolio的仓位Position中该股票的仓位
 
-    current_value = position._quantity * price
+    current_value = position._quantity * price  # 该股票已有的市值
 
     return order_value(order_book_id, portfolio.portfolio_value * percent - current_value, style)
 
@@ -470,7 +470,7 @@ def assure_stock_order_book_id(id_or_symbols):
         raise RQInvalidArgument(_("unsupported order_book_id type"))
 
 
-def downsize_amount(amount, position):
+def downsize_amount(amount, position):  # 对于股票, 买入没有调整, 卖出则比较指定股数与可卖股数, 调整为两者绝对值较小的负值
     config = Environment.get_instance().config
     if not config.validator.close_amount:
         return amount
@@ -478,7 +478,7 @@ def downsize_amount(amount, position):
         return amount
     else:
         amount = abs(amount)
-        if amount > position.sellable:
+        if amount > position.sellable:  # 比较指定股数与可卖股数
             return -position.sellable
         else:
             return -amount

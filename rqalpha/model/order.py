@@ -56,12 +56,12 @@ class Order(object):
         self._side = None
         self._position_effect = None
         self._message = None
-        self._filled_quantity = None
-        self._status = None
+        self._filled_quantity = None  # 订单已成交数量
+        self._status = None  # 委托单状态
         self._frozen_price = None
-        self._type = None
-        self._avg_price = None
-        self._transaction_cost = None
+        self._type = None  # 委托单类型: 市价/现价
+        self._avg_price = None  # 成交均价
+        self._transaction_cost = None  # 成交总费用 = 总佣金 + 总印花税
 
     @classmethod
     def __from_create__(cls, calendar_dt, trading_dt, order_book_id, quantity, side, style, position_effect):
@@ -204,7 +204,7 @@ class Order(object):
         """
         return self._transaction_cost
 
-    def _is_final(self):
+    def _is_final(self):  # 检查订单状态是否结束
         if self.status == ORDER_STATUS.PENDING_NEW or self.status == ORDER_STATUS.ACTIVE:
             return False
         else:
@@ -216,15 +216,15 @@ class Order(object):
     def _active(self):
         self._status = ORDER_STATUS.ACTIVE
 
-    def _fill(self, trade):
-        amount = trade.last_quantity
+    def _fill(self, trade):  # 根据成交填补订单, 股数成交完毕则修改订单状态为成交完毕
+        amount = trade.last_quantity  # 成交股数
         assert self.filled_quantity + amount <= self.quantity
-        new_quantity = self._filled_quantity + amount
-        self._avg_price = (self._avg_price * self._filled_quantity + trade.last_price * amount) / new_quantity
-        self._transaction_cost += trade.commission + trade.tax
-        self._filled_quantity = new_quantity
-        if self.unfilled_quantity == 0:
-            self._status = ORDER_STATUS.FILLED
+        new_quantity = self._filled_quantity + amount  # 计算成交股数
+        self._avg_price = (self._avg_price * self._filled_quantity + trade.last_price * amount) / new_quantity  # 更新成交均价
+        self._transaction_cost += trade.commission + trade.tax  # 更新成交总费用
+        self._filled_quantity = new_quantity  # 更新成交股数
+        if self.unfilled_quantity == 0:  # 没有还需成交的股数, 订单成交完毕
+            self._status = ORDER_STATUS.FILLED  # 修改订单状态: [订单全部成交完毕, 结束]
 
     def _mark_rejected(self, reject_reason):
         if not self._is_final():

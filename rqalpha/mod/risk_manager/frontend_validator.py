@@ -30,9 +30,9 @@ class FrontendValidator(object):
         position = portfolio.positions[order_book_id]
         bar = bar_dict[order_book_id]
 
-        if not self.validate_trading(order, bar):
+        if not self.validate_trading(order, bar):  # 不可交易
             return False
-        if not self.validate_available_cash(order, account, bar):
+        if not self.validate_available_cash(order, account, bar):  # 检查可用资金是否充足
             return False
         if self.config.short_stock:
             # 如果开启做空，则不验证仓位是否足够
@@ -41,7 +41,7 @@ class FrontendValidator(object):
             return False
         return True
 
-    def validate_trading(self, order, bar):
+    def validate_trading(self, order, bar):  # 判断标的是否可交易
         order_book_id = order.order_book_id
         trading_date = ExecutionContext.get_current_trading_dt().date()
 
@@ -81,14 +81,14 @@ class FrontendValidator(object):
         raise NotImplementedError
 
 
-class StockFrontendValidator(FrontendValidator):
+class StockFrontendValidator(FrontendValidator):  # 检查可用资金是否充足
     def validate_available_cash(self, order, account, bar):
         if not self.config.available_cash:
             return True
-        if order.side != SIDE.BUY:
+        if order.side != SIDE.BUY:  # 卖出则不检查
             return True
         # 检查可用资金是否充足
-        cost_money = order._frozen_price * order.quantity
+        cost_money = order._frozen_price * order.quantity  # 买入需要的现金
         if cost_money > account.portfolio.cash:
             order._mark_rejected(_(
                 "Order Rejected: not enough money to buy {order_book_id}, needs {cost_money:.2f}, cash {cash:.2f}").format(
@@ -99,10 +99,10 @@ class StockFrontendValidator(FrontendValidator):
             return False
         return True
 
-    def validate_available_position(self, order, position):
+    def validate_available_position(self, order, position):  # 检查仓位是否充足, 以保证可卖
         if not self.config.available_position:
             return True
-        if order.side != SIDE.SELL:
+        if order.side != SIDE.SELL:  # 买入委托单不检查
             return True
         if order.quantity > position.sellable:
             order._mark_rejected(_(

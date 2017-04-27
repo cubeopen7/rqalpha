@@ -38,7 +38,7 @@ class AnalyserMod(AbstractMod):
         self._enabled = False
         self._result = None
 
-        self._orders = defaultdict(list)
+        self._orders = defaultdict(list)  # 订单集合
         self._trades = []
         self._total_portfolios = []
         self._sub_portfolios = defaultdict(list)
@@ -58,33 +58,33 @@ class AnalyserMod(AbstractMod):
         if self._enabled:
             env.event_bus.add_listener(EVENT.POST_SETTLEMENT, self._collect_daily)  # 结算后触发
             env.event_bus.add_listener(EVENT.TRADE, self._collect_trade)  # 成交后触发
-            env.event_bus.add_listener(EVENT.ORDER_CREATION_PASS, self._collect_order)  # 创建订单成功后出发
+            env.event_bus.add_listener(EVENT.ORDER_CREATION_PASS, self._collect_order)  # 创建订单成功后触发
 
-    def _collect_trade(self, account, trade):
+    def _collect_trade(self, account, trade):  # 收集成交记录, 向_trades中添加成交单子
         self._trades.append(self._to_trade_record(trade))
 
     def _collect_order(self, account, order):
         self._orders[order.trading_datetime.date()].append(order)
 
-    def _collect_daily(self):
+    def _collect_daily(self):  # 收集[股票|基准等]账户的Portfolio以及仓位信息, 并记录在内部变量中
         date = self._env.calendar_dt.date()
-        portfolio = self._env.account.get_portfolio(date)
+        portfolio = self._env.account.get_portfolio(date)  # 获取今日的混合组合信息, 股票策略只有股票组合信息
 
-        self._latest_portfolio = portfolio
-        self._portfolio_daily_returns.append(portfolio.daily_returns)
-        self._total_portfolios.append(self._to_portfolio_record(date, portfolio))
+        self._latest_portfolio = portfolio  # 最新组合信息更新
+        self._portfolio_daily_returns.append(portfolio.daily_returns)  # 记录每日收益
+        self._total_portfolios.append(self._to_portfolio_record(date, portfolio))  # 将portfolio转换成dict, 并记录
 
-        if ACCOUNT_TYPE.BENCHMARK in self._env.accounts:
-            self._latest_benchmark_portfolio = self._env.accounts[ACCOUNT_TYPE.BENCHMARK].portfolio
-            self._benchmark_daily_returns.append(self._latest_benchmark_portfolio.daily_returns)
+        if ACCOUNT_TYPE.BENCHMARK in self._env.accounts:  # 处理benchmark账户
+            self._latest_benchmark_portfolio = self._env.accounts[ACCOUNT_TYPE.BENCHMARK].portfolio  # 最新benchmark信息更新
+            self._benchmark_daily_returns.append(self._latest_benchmark_portfolio.daily_returns)  # 记录基准每日收益
         else:
             self._benchmark_daily_returns.append(0)
 
         for account_type, account in six.iteritems(self._env.accounts):
             portfolio = account.get_portfolio(date)
-            self._sub_portfolios[account_type].append(self._to_portfolio_record2(date, portfolio))
+            self._sub_portfolios[account_type].append(self._to_portfolio_record2(date, portfolio))  # 每种账户的当日portfolio记录
             for order_book_id, position in six.iteritems(portfolio.positions):
-                self._positions[account_type].append(self._to_position_record(date, order_book_id, position))
+                self._positions[account_type].append(self._to_position_record(date, order_book_id, position))  # 每种账户的仓位中的每支标的的记录
 
     def _symbol(self, order_book_id):
         return self._env.data_proxy.instruments(order_book_id).symbol

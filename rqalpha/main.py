@@ -206,7 +206,7 @@ def run(config, source_code=None): # 此处的config是RqAttrDict类, 是dict转
 
         env.event_bus.publish_event(EVENT.POST_SYSTEM_INIT)  # 发布系统初始化完毕时间
 
-        scope = create_base_scope()  #
+        scope = create_base_scope()  # 代码执行环境中的变量, 以及可以执行的属性
         scope.update({
             "g": env.global_vars  # 添加全局变量
         })

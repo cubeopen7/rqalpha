@@ -64,8 +64,8 @@ class ExecutionContext(object):
     plots = None
 
     def __init__(self, phase, bar_dict=None):
-        self.phase = phase
-        self.bar_dict = bar_dict
+        self.phase = phase  # 环境种类
+        self.bar_dict = bar_dict  # 环境数据
 
     def _push(self):
         self.stack.push(self)
@@ -104,7 +104,7 @@ class ExecutionContext(object):
         raise user_exc
 
     @classmethod
-    def get_active(cls):
+    def get_active(cls):  # 取当前的环境, 在栈的最顶端
         return cls.stack.top
 
     @classmethod
@@ -133,7 +133,7 @@ class ExecutionContext(object):
         return ExecutionContext.data_proxy
 
     @classmethod
-    def enforce_phase(cls, *phases):
+    def enforce_phase(cls, *phases):  # 修饰符, 检查函数是否是在允许的ExecutionContext.phase环境中执行
         def decorator(func):
             @wraps(func)
             def wrapper(*args, **kwargs):

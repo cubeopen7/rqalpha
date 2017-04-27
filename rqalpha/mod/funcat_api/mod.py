@@ -61,11 +61,11 @@ class FuncatAPIMod(AbstractMod):
 
             def _pre_before_trading(self, *args, **kwargs):
                 calendar_date = self.rqalpha_env.calendar_dt.date()
-                self.set_current_date(calendar_date)
+                self.set_current_date(calendar_date)  # 将FuncatAPI内部的ExecutionContext全局环境中的_current_date重置
 
             def _pre_handle_bar(self, *args, **kwargs):
                 calendar_date = self.rqalpha_env.calendar_dt.date()
-                self.set_current_date(calendar_date)
+                self.set_current_date(calendar_date)  # 将FuncatAPI内部的ExecutionContext全局环境中的_current_date重置
 
             def get_price(self, order_book_id, start, end):
                 """

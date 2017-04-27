@@ -193,7 +193,7 @@ INST_TYPE_IN_STOCK_ACCOUNT = [
 ]
 
 
-def get_account_type(order_book_id):
+def get_account_type(order_book_id):  # 根据标的, 获取需要操作的账户类型
     from ..execution_context import ExecutionContext
     instrument = ExecutionContext.get_instrument(order_book_id)
     enum_type = instrument.enum_type

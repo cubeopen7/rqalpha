@@ -26,7 +26,7 @@ from rqalpha.const import ACCOUNT_TYPE
 
 ONE_MINUTE = datetime.timedelta(minutes=1)
 
-# 模拟帐号事件源
+# 模拟账户事件源
 class SimulationEventSource(AbstractEventSource):
     def __init__(self, env, account_list):
         self._env = env

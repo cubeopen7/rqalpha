@@ -25,7 +25,7 @@ class YieldCurveStore(object):
     def __init__(self, f):
         self._table = bcolz.open(f, 'r')
         self._dates = self._table.cols['date'][:]
-
+    # 根据日期段以及期限获得无风险收益数据
     def get_yield_curve(self, start_date, end_date, tenor):
         d1 = start_date.year * 10000 + start_date.month * 100 + start_date.day
         d2 = end_date.year * 10000 + end_date.month * 100 + end_date.day
@@ -51,6 +51,7 @@ class YieldCurveStore(object):
             return df[tenor]
         return df
 
+    # 根据日期段计算期限,并获得无风险收益数据
     def get_risk_free_rate(self, start_date, end_date):
         tenor = risk_free_helper.get_tenor_for(start_date, end_date)
         tenor = tenor[-1] + tenor[:-1]

@@ -65,9 +65,9 @@ ORDER_TYPE = CustomEnum("ORDER_TYPE", [
 ])
 
 ORDER_STATUS = CustomEnum("ORDER_STATUS", [
-    "PENDING_NEW",
-    "ACTIVE",
-    "FILLED",
+    "PENDING_NEW",  # 创建中
+    "ACTIVE",  # 激活, 待交易
+    "FILLED",  # 订单全部成交完毕, 结束
     "REJECTED",
     "PENDING_CANCEL",
     "CANCELLED",

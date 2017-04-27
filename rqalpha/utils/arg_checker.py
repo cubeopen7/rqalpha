@@ -334,7 +334,7 @@ def verify_that(arg_name):
     return ArgumentChecker(arg_name)
 
 
-def apply_rules(*rules):
+def apply_rules(*rules):  # 检查函数输入规则
     def decorator(func):
         @wraps(func)
         def api_rule_check_wrapper(*args, **kwargs):

@@ -193,12 +193,12 @@ class Scheduler(object):
             self._fill_month()
 
     @staticmethod
-    def _minutes_since_midnight(hour, minute):
+    def _minutes_since_midnight(hour, minute):  # 获得今天的分钟数, 由00:00至今
         return hour * 60 + minute
 
     def next_bar_(self, bars):
         with ExecutionContext(EXECUTION_PHASE.SCHEDULED, bars):
-            self._current_minute = self._minutes_since_midnight(self._ucontext.now.hour, self._ucontext.now.minute)
+            self._current_minute = self._minutes_since_midnight(self._ucontext.now.hour, self._ucontext.now.minute)  # 当前的分钟数
             for day_rule, time_rule, func in self._registry:
                 if day_rule() and time_rule():
                     with ModifyExceptionFromType(EXC_TYPE.USER_EXC):

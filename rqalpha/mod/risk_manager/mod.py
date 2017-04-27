@@ -37,21 +37,21 @@ class RiskManagerMod(AbstractMod):
     def tear_down(self, code, exception=None):
         pass
 
-    def _frontend_validate(self, account, order):
-        frontend_validator = self._get_frontend_validator_for(order.order_book_id)
-        frontend_validator.order_pipeline(account, order)
+    def _frontend_validate(self, account, order):  # 检查委托单ORDER是否可以下
+        frontend_validator = self._get_frontend_validator_for(order.order_book_id)  # 根据标的类型获取相应的验证器
+        frontend_validator.order_pipeline(account, order)  # 检查委托单ORDER是否可以下
 
     def _get_frontend_validator_for(self, order_book_id):
         account_type = get_account_type(order_book_id)
         try:
             return self._frontend_validator[account_type]
-        except KeyError:
+        except KeyError:  # 响应的账户类型没有验证器, 则创建
             if account_type == ACCOUNT_TYPE.STOCK:
                 validator = StockFrontendValidator(self.mod_config)
             elif account_type == ACCOUNT_TYPE.FUTURE:
                 validator = FutureFrontendValidator(self.mod_config)
             else:
                 raise RuntimeError('account type {} not supported yet'.format(account_type))
-            self._frontend_validator[account_type] = validator
+            self._frontend_validator[account_type] = validator  # 缓存验证器
             return validator
 

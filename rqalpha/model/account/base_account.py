@@ -41,8 +41,8 @@ class BaseAccount(Persistable):
         self.tax_decider = init_tax(self._account_type)  # 印花税初始化
 
         self.all_portfolios = OrderedDict()
-        self.daily_orders = {}
-        self.daily_trades = []
+        self.daily_orders = {}  # 每日的订单, 类方法before_trading每日清理结束的订单, 留下未完成订单
+        self.daily_trades = []  # 每日的成交单, 类方法before_trading每日清空
         self._last_trade_id = 0
 
         # 该事件会触发策略的before_trading函数
@@ -104,7 +104,7 @@ class BaseAccount(Persistable):
 
     def portfolio_persist(self):
         trading_date = ExecutionContext.get_current_trading_dt().date()
-        self.all_portfolios[trading_date] = self.portfolio._clone()
+        self.all_portfolios[trading_date] = self.portfolio._clone()  # 将今天的组合信息保存在all_portfolios中
 
     def get_portfolio(self, trading_date):
         return self.all_portfolios[trading_date]
